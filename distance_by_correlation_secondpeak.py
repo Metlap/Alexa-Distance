@@ -62,6 +62,7 @@ def find_position(original_file, recording_file):
     print("Position of original.wav in recording.wav:", max_index)
     
     return max_index
+    #return time_at_max_index
 
 def visualize_sound_file_with_second_peak(file_path, threshold_ms, correlation_index):
     # Read the sound file
@@ -84,7 +85,7 @@ def visualize_sound_file_with_second_peak(file_path, threshold_ms, correlation_i
 
     # Mark the correlation point with a red line
     time_at_correlation = time[correlation_index]
-    plt.axvline(x=time_at_correlation, color='r', linestyle='--', label=f'Correlation at {time_at_correlation:.2f} seconds')
+    plt.axvline(x=time_at_correlation, color='r', linestyle='-', label=f'Correlation at {time_at_correlation:.2f} seconds')
 
     # Calculate the threshold in terms of sample index
     threshold_index = int(threshold_ms * sample_rate / 1000)
@@ -116,16 +117,17 @@ def visualize_sound_file_with_second_peak(file_path, threshold_ms, correlation_i
     plt.show()
 
 if __name__ == "__main__":
-    # Check if three arguments are provided as command-line arguments
-    if len(sys.argv) != 3:
-        print("Usage: python combined_script.py <path_to_sound_file> <threshold_ms> <path_to_recording_file>")
-    else:
-        recording_file = sys.argv[1]
-        threshold_ms = float(sys.argv[2])
 
-        # Use find_position function to find correlation point
-        original_file = 'soundfiles/clap_original_trim_30ms.wav'
-        correlation_index = find_position(original_file, recording_file)
+    recording_file = "xyz.wav"
+    threshold_ms = 20
 
-        # Visualize sound file with second peak
-        visualize_sound_file_with_second_peak(recording_file, threshold_ms, correlation_index)
+    # Use find_position function to find correlation point
+    original_file = 'soundfiles/clap_original_trim_30ms.wav'
+    correlation_index = find_position(original_file, recording_file)
+    print(correlation_index)
+
+    visualize_sound_file_with_second_peak(recording_file, threshold_ms, correlation_index)
+
+
+
+# python3 distance_by_correlation_secondpeak.py "soundfiles/clap_25m_50.wav" 20 

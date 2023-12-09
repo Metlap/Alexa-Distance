@@ -43,7 +43,7 @@ def visualize_sound_file_with_second_peak(file_path, threshold_ms):
     if len(peaks) > 0:
         first_peak_index = peaks[0]
         time_of_first_peak = time[first_peak_index]
-        plt.axvline(x=time_of_first_peak, color='r', linestyle='--', label=f'First Peak at {time_of_first_peak:.2f} seconds')
+        plt.axvline(x=time_of_first_peak, color='r', linestyle='-', label=f'First Peak at {time_of_first_peak:.2f} seconds')
 
         # Calculate the threshold in terms of sample index
         threshold_index = int(threshold_ms * sample_rate / 1000)
