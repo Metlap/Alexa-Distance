@@ -61,7 +61,7 @@ def visualize_sound_file_with_second_peak(file_path, threshold_ms):
 
     print(f'The time difference between the peaks is: {time_of_second_peak - time_of_first_peak}')
 
-    print(f'The distance between the speaker and the microphone is {340 * (time_of_second_peak - time_of_first_peak)}')
+    print(f'The distance between the speaker and the microphone is {334 * (time_of_second_peak - time_of_first_peak)}')
 
     # Set plot labels and title
     plt.title('Sound File Visualization with Second Peak')
