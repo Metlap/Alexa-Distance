@@ -110,4 +110,4 @@ def find_peak_position(original_file, recording_file):
     #print("Time at the highest peak:", time_at_highest_peak, "seconds")
 
 # Example usage
-find_peak_position('sounds/original.wav', 'sounds/recording.wav')
+find_peak_position('soundfiles/clap_original.wav', 'soundfiles/clap_15m_75.wav')
