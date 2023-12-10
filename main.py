@@ -9,6 +9,8 @@ from pydub import AudioSegment
 
 #CONSTANTS
 SPEED_OF_SOUND = 334
+PLOT_WIDTH = 10
+PLOT_HEIGHT = 6
 
 def plot_spectrogram(file_path, subplot_title):
     # Read the sound file
@@ -26,7 +28,7 @@ def plot_spectrogram(file_path, subplot_title):
 
 def draw_spectogram(original_file_path, recorded_file_path):
     # Set the figure size to (width, height)
-    plt.figure(figsize=(12, 8))  # Adjust the width and height as needed
+    plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))  # Adjust the width and height as needed
 
     # Create a 2x1 subplot layout
     plt.subplot(2, 1, 1)
@@ -54,7 +56,7 @@ def visualize_sound_file(file_path, subplot_title):
     plt.ylabel('Amplitude')
 
 def draw_amplitudevstimegraph(original_file_path, recorded_file_path):
-    plt.figure(figsize=(12, 8)) 
+    plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT)) 
 
     # Create a 2x1 subplot layout
     plt.subplot(2, 1, 1)
@@ -90,7 +92,7 @@ def plot_time_vs_decibels(file_path, subplot_title):
 
 def draw_decibelsvstimegraph(original_file_path, recorded_file_path):
     # Set the figure size to (width, height)
-    plt.figure(figsize=(10, 8))  # Adjust the width and height as needed
+    plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))  # Adjust the width and height as needed
 
     # Create a 2x1 subplot layout
     plt.subplot(2, 1, 1)
@@ -138,6 +140,7 @@ def visualize_sound_file_with_second_peak(file_path, threshold_ms):
     peaks = find_peaks(data, threshold)
 
     # Plot the sound wave
+    plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))
     plt.plot(time, data)
 
     # Mark the first peak with a red line
@@ -165,6 +168,7 @@ def visualize_sound_file_with_second_peak(file_path, threshold_ms):
     print(f'The distance between the speaker and the wall is {SPEED_OF_SOUND * (time_of_second_peak - time_of_first_peak)}')
 
     # Set plot labels and title
+    
     plt.title('Sound File Visualization with Second Peak')
     plt.xlabel('Time (s)')
     plt.ylabel('Amplitude')
@@ -207,7 +211,7 @@ def find_distance_by_correlation_and_second_peak(original_file, recording_file, 
     time_axis = np.arange(0, len(cross_correlation)) / sr_recording
     
     # Plot the original and recording signals
-    plt.figure(figsize=(10, 6))
+    plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))
 
     plt.subplot(3, 1, 1)
     plt.plot(np.arange(0, len(original)) / sr_recording, original)
@@ -221,7 +225,7 @@ def find_distance_by_correlation_and_second_peak(original_file, recording_file, 
     plt.subplot(3, 1, 3)
     plt.plot(time_axis, cross_correlation)
     plt.axvline(x=time_at_max_index, color='r', linestyle='--', label='Max Correlation')
-    plt.axvline(x=time_at_max_index_after_max, color='g', linestyle='--', label='Max After 20ms')
+    plt.axvline(x=time_at_max_index_after_max, color='g', linestyle='--', label='Peak after Max Correlation')
     plt.title('Cross-Correlation Result')
     plt.legend()
     
@@ -235,7 +239,7 @@ def find_distance_by_correlation_and_second_peak(original_file, recording_file, 
 
     # print(f'The time difference between the peaks is: {time_at_max_index_after_max - time_at_max_index}')
 
-    print(f'The distance between the speaker and the wall is {334 * (time_at_max_index_after_max - time_at_max_index)} meters')
+    print(f'The distance between the speaker and the wall is {SPEED_OF_SOUND * (time_at_max_index_after_max - time_at_max_index)} meters')
 
     plt.tight_layout()
     plt.show()
@@ -244,6 +248,74 @@ def find_distance_by_correlation_and_second_peak(original_file, recording_file, 
 
 # find distance by calculating time difference between correlation point and second highest peak END
 
+# find distance by calculating time difference between two correlation points START
+
+def find_correlation_in_segment(original_file, recording_file, start_time_ms, end_time_ms):
+    # Load the audio files
+    original, _ = librosa.load(original_file)
+    recording, sr_recording = librosa.load(recording_file)
+
+    # Convert time points from milliseconds to seconds
+    start_time_sec = start_time_ms / 1000
+    end_time_sec = end_time_ms / 1000
+
+    # Extract the segment from the recording signal
+    recording_segment = recording[int(start_time_sec * sr_recording):int(end_time_sec * sr_recording)]
+
+    # Compute the cross-correlation
+    cross_correlation = np.correlate(recording_segment, original, mode='same')
+    
+    # Find the index of the maximum correlation
+    max_index = np.argmax(cross_correlation)
+    
+    # Convert index to time in seconds within the segment
+    time_at_max_index = max_index / sr_recording
+    
+    time_axis = np.arange(0, len(cross_correlation)) / sr_recording
+    
+    # Plot the original and recording signals
+    plt.figure(figsize=(PLOT_WIDTH, PLOT_HEIGHT))
+
+    plt.subplot(3, 1, 1)
+    plt.plot(np.arange(0, len(original)) / sr_recording, original)
+    plt.title('Original Signal')
+
+    plt.subplot(3, 1, 2)
+    plt.plot(np.arange(0, len(recording_segment)) / sr_recording, recording_segment)
+    plt.title('Recording Signal Segment')
+
+    # Plot the cross-correlation result
+    plt.subplot(3, 1, 3)
+    plt.plot(time_axis, cross_correlation)
+    plt.axvline(x=time_at_max_index, color='r', linestyle='-', label='Max Correlation')
+    plt.title('Cross-Correlation Result')
+    plt.legend()
+
+    plt.tight_layout()
+    plt.show()
+
+    # Print the position within the segment
+    # print(f"Position of original.wav in recording.wav from {start_time_ms}ms to {end_time_ms}ms:", max_index)
+    
+    return time_at_max_index
+
+def find_distance_by_two_correlation_points(original_trim_file_path, recorded_file_path, threshold_ms):
+    # find first correlation add threshold find second correlation
+    first_correlation_time_occurence = find_correlation_in_segment(original_trim_file_path, recorded_file_path, 0 , length_of_audio(recorded_file_path))
+    second_correlation_time_occurence = find_correlation_in_segment(original_trim_file_path, recorded_file_path, first_correlation_time_occurence*1000 + threshold_ms, length_of_audio(recorded_file_path))
+    
+    if(first_correlation_time_occurence > 0):
+        #print(f'The first correlation found at {first_correlation_time_occurence} ms.')
+        if(second_correlation_time_occurence > 0):
+            #print(f'The first correlation found at {second_correlation_time_occurence} ms.')
+            print(f'The distance between the speaker and the wall is {SPEED_OF_SOUND * ((second_correlation_time_occurence + first_correlation_time_occurence + threshold_ms/1000) - first_correlation_time_occurence)} meters')
+
+
+def length_of_audio(audio_file_path):
+    audio = AudioSegment.from_file(audio_file_path)
+    return len(audio)
+
+# find distance by calculating tine difference between two correlation points END
 
 if __name__ == "__main__":
 
@@ -256,16 +328,22 @@ if __name__ == "__main__":
         threshold_ms = float(sys.argv[4])
 
         # visualising original recorded sounds
-        # draw_spectogram(original_file_path, recorded_file_path)
-        # draw_amplitudevstimegraph(original_file_path, recorded_file_path)
-        # draw_decibelsvstimegraph(original_file_path, recorded_file_path)
+        draw_spectogram(original_file_path, recorded_file_path)
+        draw_amplitudevstimegraph(original_file_path, recorded_file_path)
+        draw_decibelsvstimegraph(original_file_path, recorded_file_path)
 
-        # find distance by calculating time difference between highest peaks
+        
         print("------------------- DISTANCE MEASUREMENT BY FIRST AND SECOND HIGHEST PEAK -------------------")
+        # find distance by calculating time difference between highest peaks
         visualize_sound_file_with_second_peak(recorded_file_path, threshold_ms)
+
         print("------------------- DISTANCE MEASUREMENT BY CORRELATION POINT AND SECOND PEAK -------------------")
         # find distance by calculation correlation and second peak after correlation
         find_distance_by_correlation_and_second_peak(original_trim_file_path, recorded_file_path, threshold_ms)
+
+        print("------------------- DISTANCE MEASUREMENT BY TWO CORRELATION POINTS -------------------")
+        # find distance by calculation two correlation points
+        find_distance_by_two_correlation_points(original_trim_file_path, recorded_file_path, threshold_ms)
 
 
 # run trim_recorded_audio_from_complete_file.py before running this script

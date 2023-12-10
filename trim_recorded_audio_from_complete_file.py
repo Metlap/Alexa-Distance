@@ -62,28 +62,28 @@ def trim_audio(input_file, output_file, start_ms, end_ms):
     # Export the trimmed audio to a new file
     trimmed_audio.export(output_file, format="wav")  # Change the format if needed
 
+def prepare_sample_from_recording(recorded_file_path, output_file_path, buick_file_path):
+    time_at_correlation_index = find_position(buick_file_path, recorded_file_path)
+    audio = AudioSegment.from_file(recorded_file_path)
+    audio_buick = AudioSegment.from_file(buick_file_path)
+    duration_ms = len(audio)
+    duration_ms_buick = len(audio_buick)
+
+    start_time_ms = (time_at_correlation_index * 1000) + duration_ms_buick
+    end_time_ms = duration_ms
+
+    trim_audio(recorded_file_path, output_file_path, start_time_ms, end_time_ms)
+
+    print(f"Audio trimmed successfully from {start_time_ms}ms to {end_time_ms}ms.")
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python plot_spectrogram.py <path_to_sound_file1> <path_to_sound_file2>")
     else:
         recorded_file_path = sys.argv[1]
-
-        time_at_correlation_index = find_position('soundfiles/buick.wav', recorded_file_path)
         output_file_path = sys.argv[2]
-
-        audio = AudioSegment.from_file(recorded_file_path)
-        audio_buick = AudioSegment.from_file('soundfiles/buick.wav')
-
-        duration_ms = len(audio)
-        duration_ms_buick = len(audio_buick)
-
-        start_time_ms = (time_at_correlation_index * 1000) + duration_ms_buick
-        end_time_ms = duration_ms
-
-        trim_audio(recorded_file_path, output_file_path, start_time_ms, end_time_ms)
-
-        print(f"Audio trimmed successfully from {start_time_ms}ms to {end_time_ms}ms.")
+        buick_file_path = 'soundfiles/buick.wav'
+        prepare_sample_from_recording(recorded_file_path, output_file_path, buick_file_path)
 
 
 # python3 trim_recorded_audio_from_complete_file.py soundfiles/intent_buick_clap.wav xyz.wav  
