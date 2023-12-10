@@ -59,7 +59,7 @@ def find_distance_by_correlation_and_second_peak(original_file, recording_file):
 
     print(f'The time difference between the peaks is: {time_at_max_index_after_max - time_at_max_index}')
 
-    print(f'The distance between the speaker and the microphone is {334 * (time_at_max_index_after_max - time_at_max_index)} meters')
+    print(f'The distance between the speaker and the microphone is {340 * (time_at_max_index_after_max - time_at_max_index)} meters')
 
     plt.tight_layout()
     plt.show()
