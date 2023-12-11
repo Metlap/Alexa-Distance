@@ -69,6 +69,158 @@ def draw_amplitudevstimegraph(original_file_path, recorded_file_path):
     plt.tight_layout()
     plt.show()
 
+def noise_removal_lms(noisy_signal):
+
+    # Load the audio file
+    sample_rate, audio_data = wavfile.read(noisy_signal)
+
+    # Define the LMS adaptive filtering function
+    def lms_filter(input_signal, mu=0.01, filter_order=64):
+        num_samples = len(input_signal)
+        weights = np.zeros(filter_order)
+        output_signal = np.zeros(num_samples)
+
+        for i in range(filter_order, num_samples):
+            x = input_signal[i - filter_order:i]
+            error = input_signal[i] - np.dot(weights, x)
+            weights = weights + 2 * mu * error * x
+            output_signal[i] = np.dot(weights, x)
+
+        return output_signal
+
+    # Apply LMS filtering
+    filtered_signal = lms_filter(audio_data)
+
+    # Visualize the original and filtered signals
+    plt.figure(figsize=(12, 6))
+
+    # Plot original signal
+    plt.subplot(2, 1, 1)
+    plt.plot(np.arange(len(audio_data)) / sample_rate, audio_data, label='Original Signal')
+    plt.title('Original Signal')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+
+    # Plot filtered signal
+    plt.subplot(2, 1, 2)
+    plt.plot(np.arange(len(filtered_signal)) / sample_rate, filtered_signal, label='Filtered Signal', color='orange')
+    plt.title('Filtered Signal')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+
+    # Show the plots
+    plt.tight_layout()
+    plt.show()
+
+# Function to add Gaussian white noise to the audio
+def add_gaussian_noise(audio, snr_dB):
+    # Calculate signal power
+    signal_power = np.sum(audio**2) / len(audio)
+
+    # Calculate noise power based on SNR
+    snr_linear = 10**(snr_dB / 10.0)
+    noise_power = signal_power / snr_linear
+
+    # Generate Gaussian white noise
+    noise = np.random.normal(0, np.sqrt(noise_power), len(audio))
+
+    # Mix noise with the original audio
+    noisy_audio = audio + noise
+
+    return noisy_audio
+
+def improve_snr(original_file_path):
+    # Load the original audio file
+    sample_rate, original_audio = wavfile.read(original_file_path)
+
+    # Normalize the original audio to the range [-1, 1]
+    original_audio = original_audio.astype(np.float32)
+    original_audio /= np.max(np.abs(original_audio))
+
+    # Add Gaussian white noise with a specified SNR
+    snr_dB = 10  # Adjust the SNR as needed
+    noisy_audio = add_gaussian_noise(original_audio, snr_dB)
+
+    # Visualize the original and noisy signals
+    plt.figure(figsize=(12, 4))
+
+    # Plot original signal
+    plt.subplot(1, 2, 1)
+    plt.plot(np.arange(len(original_audio)) / sample_rate, original_audio, label='Original Signal')
+    plt.title('Original Signal')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+
+    # Plot noisy signal
+    plt.subplot(1, 2, 2)
+    plt.plot(np.arange(len(noisy_audio)) / sample_rate, noisy_audio, label='Noisy Signal', color='orange')
+    plt.title('Noisy Signal (SNR={} dB)'.format(snr_dB))
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+
+    # Show the plots
+    plt.tight_layout()
+    plt.show()
+    
+    # Save the filtered audio
+    wavfile.write(original_file_path, sample_rate, np.int16(noisy_audio * 32767))  # Convert back to 16-bit integer
+    
+def lms_filter(original_file_path):
+
+    # Load the audio file
+    sample_rate, audio_data = wavfile.read(original_file_path)
+
+    # Normalize the audio signal to the range [-1, 1]
+    audio_data = audio_data.astype(np.float32)
+    audio_data /= np.max(np.abs(audio_data))
+
+    # Define the LMS adaptive filtering function
+    def lms_filter(input_signal, mu=0.005, filter_order=256):
+        num_samples = len(input_signal)
+        weights = np.zeros(filter_order)
+        output_signal = np.zeros(num_samples)
+
+        for i in range(filter_order, num_samples):
+            x = input_signal[i - filter_order:i]
+            error = input_signal[i] - np.dot(weights, x)
+            weights = weights + 2 * mu * error * x
+            output_signal[i] = np.dot(weights, x)
+
+        return output_signal
+
+    # Apply LMS filtering
+    filtered_signal = lms_filter(audio_data)
+
+    # Visualize the original and filtered signals
+    plt.figure(figsize=(12, 6))
+
+    # Plot original signal
+    plt.subplot(2, 1, 1)
+    plt.plot(np.arange(len(audio_data)) / sample_rate, audio_data, label='Original Signal')
+    plt.title('Original Signal')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+
+    # Plot filtered signal
+    plt.subplot(2, 1, 2)
+    plt.plot(np.arange(len(filtered_signal)) / sample_rate, filtered_signal, label='Filtered Signal', color='orange')
+    plt.title('Filtered Signal')
+    plt.xlabel('Time (seconds)')
+    plt.ylabel('Amplitude')
+    plt.legend()
+
+    # Show the plots
+    plt.tight_layout()
+    plt.show()
+
+    # Save the filtered audio
+    wavfile.write(original_file_path, sample_rate, np.int16(filtered_signal * 32767))  # Convert back to 16-bit integer
+
 def calculate_decibels(data, reference_amplitude=1.0):
     # Calculate decibels using the formula: 20 * log10(amplitude / reference_amplitude)
     return 20 * np.log10(np.abs(data) / reference_amplitude)
@@ -331,6 +483,12 @@ if __name__ == "__main__":
         draw_spectogram(original_file_path, recorded_file_path)
         draw_amplitudevstimegraph(original_file_path, recorded_file_path)
         draw_decibelsvstimegraph(original_file_path, recorded_file_path)
+        
+        #Improve the Signal to noise ratio by adding Additive Gaussian White Noise
+        improve_snr(recorded_file_path)
+        #Perform noise removal
+        lms_filter(recorded_file_path)
+        #noise_removal_lms(recorded_file_path)
 
         
         print("------------------- DISTANCE MEASUREMENT BY FIRST AND SECOND HIGHEST PEAK -------------------")
