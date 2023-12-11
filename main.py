@@ -147,7 +147,7 @@ def improve_snr(original_file_path):
     original_audio /= np.max(np.abs(original_audio))
 
     # Add Gaussian white noise with a specified SNR
-    snr_dB = 10  # Adjust the SNR as needed
+    snr_dB = 20  # Adjust the SNR as needed
     noisy_audio = add_gaussian_noise(original_audio, snr_dB)
 
     # Visualize the original and noisy signals
