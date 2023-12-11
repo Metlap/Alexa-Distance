@@ -127,7 +127,14 @@ def add_gaussian_noise(audio, snr_dB):
     noise = np.random.normal(0, np.sqrt(noise_power), len(audio))
 
     # Mix noise with the original audio
-    noisy_audio = audio + noise
+    print(f'Audio shape is {audio.shape}')
+    print(f'Noise shape is {noise.shape}')
+    
+    #Check if its stereo audio, then choose one channel
+    if audio.ndim == 2:
+        noisy_audio = audio[:, 0] + noise
+    else:
+        noisy_audio = audio + noise
 
     return noisy_audio
 
