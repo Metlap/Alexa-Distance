@@ -492,9 +492,9 @@ if __name__ == "__main__":
         draw_decibelsvstimegraph(original_file_path, recorded_file_path)
         
         #Improve the Signal to noise ratio by adding Additive Gaussian White Noise
-        improve_snr(recorded_file_path)
+        #improve_snr(recorded_file_path)
         #Perform noise removal
-        lms_filter(recorded_file_path)
+        #lms_filter(recorded_file_path)
         #noise_removal_lms(recorded_file_path)
 
         
