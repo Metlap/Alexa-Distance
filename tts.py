@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     tts_file_name = text_to_speech(input_text, language_code)
 
-    output_file_name = 'output/merged_output.wav'
+    output_file_name = 'output/transmit_this.wav'
     audio_files = []
     audio_files.append(tts_file_name)
     audio_files.append("output/silent_500ms.wav")

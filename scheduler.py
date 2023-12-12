@@ -47,7 +47,7 @@ def get_duration(file_path):
 if __name__ == "__main__":
 
     alexa_intent_sound = "output/merged_output.wav"
-    recorded_chirp_file = "complete_recorded.wav"
+    recorded_chirp_file = "output/complete_recording.wav"
 
     transmit_thread = threading.Thread(target=play_sound, args=(alexa_intent_sound,))
     record_thread = threading.Thread(target=record_audio, args=(7, recorded_chirp_file))
