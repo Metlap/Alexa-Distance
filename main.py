@@ -510,7 +510,4 @@ if __name__ == "__main__":
         # find distance by calculation two correlation points
         find_distance_by_two_correlation_points(original_trim_file_path, recorded_file_path, threshold_ms)
 
-
-# run trim_recorded_audio_from_complete_file.py before running this script
-
 # python3 main.py soundfiles/clap_original.wav xyz.wav soundfiles/clap_original_trim_30ms.wav 20

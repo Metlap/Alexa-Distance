@@ -13,5 +13,5 @@ def play_sound(file_path):
     print("Sound finished.")
 
 if __name__ == "__main__":
-    sound_file = "chirp.wav"
+    sound_file = "xyz.wav"
     play_sound(sound_file)

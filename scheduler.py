@@ -4,9 +4,8 @@ import sounddevice as sd
 import numpy as np
 from scipy.io import wavfile
 import matplotlib.pyplot as plt
-
 import pygame
-import time
+
 
 def play_sound(file_path):
     pygame.mixer.pre_init()
@@ -32,49 +31,12 @@ def record_audio(duration, output_filename):
 
     print(f"Recording complete at {get_timestamp()}")
 
-    # Save recording
     wavfile.write(output_filename, 44100, audio_data)
 
 def get_timestamp():
     # Get current timestamp in HH:MM:ss:hhhhhhhhh format
     current_time = time.time()
     return time.strftime('%H:%M:%S:', time.gmtime(current_time)) + f"{current_time:.9f}"
-
-def plot_waveform(file_path, title, channel=0):
-    sample_rate, data = wavfile.read(file_path)
-    time = np.arange(0, len(data)) / sample_rate
-
-    # Select the desired channel for plotting
-    channel_data = data
-
-    plt.figure(figsize=(10, 4))
-    plt.plot(time, channel_data, color='blue')  # You can change 'blue' to any color you prefer
-    plt.title(title)
-    plt.xlabel('Time (s)')
-    plt.ylabel('Amplitude')
-    plt.grid(True)
-    plt.show()
-
-def plot_single_waveform(file_path1, title1, file_path2, title2):
-    sample_rate1, data1 = wavfile.read(file_path1)
-    time1 = np.arange(0, len(data1)) / sample_rate1
-
-    sample_rate2, data2 = wavfile.read(file_path2)
-    time2 = np.arange(0, len(data2)) / sample_rate2
-
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8), sharex=True)
-
-    ax1.plot(time1, data1, color='blue', label=title1)
-    ax1.set_ylabel('Amplitude')
-    ax1.legend()
-
-    ax2.plot(time2, data2, color='green', label=title2)
-    ax2.set_xlabel('Time (s)')
-    ax2.set_ylabel('Amplitude')
-    ax2.legend()
-
-    plt.show()
-
 
 
 def get_duration(file_path):
@@ -83,17 +45,13 @@ def get_duration(file_path):
     return duration
 
 if __name__ == "__main__":
-    # Original sound file
-    original_chirp_file = "sweep.wav"
-    recorded_chirp_file = "sweep_recorded.wav"
-    # original_chirp_file = "chirp.wav"
-    # recorded_chirp_file = "chirp_recorded.wav"
 
-    # Create threads for the two functions
-    transmit_thread = threading.Thread(target=play_sound, args=(original_chirp_file,))
+    alexa_intent_sound = "output/merged_ouput.wav"
+    recorded_chirp_file = "complete_recorded.wav"
+
+    transmit_thread = threading.Thread(target=play_sound, args=(alexa_intent_sound,))
     record_thread = threading.Thread(target=record_audio, args=(2, recorded_chirp_file))
 
-    # Start both threads at the same time
     transmit_thread.start()
     record_thread.start()
 
@@ -103,11 +61,7 @@ if __name__ == "__main__":
 
 
     print(f"Duration of recorded chirp: {get_duration(recorded_chirp_file):.2f} seconds")
-    print(f"Duration of Original chirp: {get_duration(original_chirp_file):.2f} seconds")
+    print(f"Duration of Original chirp: {get_duration(alexa_intent_sound):.2f} seconds")
 
     # Usage
     #plot_single_waveform(original_chirp_file, "Original Chirp Sound", recorded_chirp_file, "Recorded Chirp Sound")
-
-
-    plot_waveform(original_chirp_file, "Original Chirp Sound")
-    plot_waveform(recorded_chirp_file, "Recorded Chirp Sound")
